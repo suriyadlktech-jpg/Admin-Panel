@@ -1,19 +1,29 @@
+import { useQuery } from "@tanstack/react-query";
 import Chart from "react-apexcharts";
 import { useState } from "react";
 import { Dropdown } from "../ui/dropdown/Dropdown";
 import { DropdownItem } from "../ui/dropdown/DropdownItem";
 import { MoreDotIcon } from "../../icons";
+import { fetchMonthlyRegistrations } from "../../Services/DashboardServices/userRegistrationChartServices"; // create this service
 
-export default function UserRegistrationRation() {
+export default function UserRegistrationRatio() {
+  const [isOpen, setIsOpen] = useState(false);
+
+  // ✅ Fetch registration count per month
+  const { data, isLoading, isError } = useQuery({
+    queryKey: ["monthlyRegistrations"],
+    queryFn: fetchMonthlyRegistrations,
+    staleTime: 1000 * 60 * 5, // cache for 5 minutes
+  });
+
+  // Chart options
   const options = {
     colors: ["#465fff"],
     chart: {
       fontFamily: "Outfit, sans-serif",
       type: "bar",
       height: 180,
-      toolbar: {
-        show: false,
-      },
+      toolbar: { show: false },
     },
     plotOptions: {
       bar: {
@@ -23,25 +33,15 @@ export default function UserRegistrationRation() {
         borderRadiusApplication: "end",
       },
     },
-    dataLabels: {
-      enabled: false,
-    },
-    stroke: {
-      show: true,
-      width: 4,
-      colors: ["transparent"],
-    },
+    dataLabels: { enabled: false },
+    stroke: { show: true, width: 4, colors: ["transparent"] },
     xaxis: {
       categories: [
-        "Jan", "Feb", "Mar", "Apr", "May", "Jun",
-        "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"
+        "Jan","Feb","Mar","Apr","May","Jun",
+        "Jul","Aug","Sep","Oct","Nov","Dec"
       ],
-      axisBorder: {
-        show: false,
-      },
-      axisTicks: {
-        show: false,
-      },
+      axisBorder: { show: false },
+      axisTicks: { show: false },
     },
     legend: {
       show: true,
@@ -49,39 +49,21 @@ export default function UserRegistrationRation() {
       horizontalAlign: "left",
       fontFamily: "Outfit",
     },
-    yaxis: {
-      title: {
-        text: undefined,
-      },
-    },
-    grid: {
-      yaxis: {
-        lines: {
-          show: true,
-        },
-      },
-    },
-    fill: {
-      opacity: 1,
-    },
+    yaxis: { title: { text: undefined } },
+    grid: { yaxis: { lines: { show: true } } },
+    fill: { opacity: 1 },
     tooltip: {
-      x: {
-        show: false,
-      },
-      y: {
-        formatter: (val) => `${val}`,
-      },
+      x: { show: false },
+      y: { formatter: (val) => `${val}` },
     },
   };
 
   const series = [
     {
-      name: "Sales",
-      data: [168, 385, 201, 298, 187, 195, 291, 110, 215, 390, 280, 112],
+      name: "Registrations",
+      data: isLoading || isError ? Array(12).fill(0) : data, // fallback if loading/error
     },
   ];
-
-  const [isOpen, setIsOpen] = useState(false);
 
   function toggleDropdown() {
     setIsOpen(!isOpen);

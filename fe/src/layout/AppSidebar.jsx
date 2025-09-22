@@ -1,6 +1,7 @@
 // src/components/Sidebar/AppSidebar.jsx
 import { useCallback, useEffect, useRef, useState } from "react";
 import { Link, useLocation } from "react-router";
+import PrithuLogo from "../Assets/Logo/PrithuLogo.png"
 
 // Assume these icons are imported from your icon library
 import {
@@ -44,7 +45,7 @@ const navItems = [
   {
     name: "Feeds Info",
     icon: <TableIcon />,
-    subItems: [{ name: "Basic Tables", path: "/basic-tables", pro: false }],
+    subItems: [{ name: "Basic Tables", path: "/feed-Page", pro: false }],
   },
   {
     name: "Subscriptions Info",
@@ -293,28 +294,30 @@ const AppSidebar = () => {
       >
         <Link to="/">
           {isExpanded || isHovered || isMobileOpen ? (
-            <>
+            <><div className="flex items-center gap-3">
               <img
                 className="dark:hidden"
-                src="/images/logo/logo.svg"
+                src={PrithuLogo}
                 alt="Logo"
-                width={150}
+                width={40}
                 height={40}
-              />
+              /><p className="text-xl font-bold">Prithu DashBoard</p>
+              </div>
+              
               <img
                 className="hidden dark:block"
-                src="/images/logo/logo-dark.svg"
+                src={PrithuLogo}
                 alt="Logo"
-                width={150}
+                width={40}
                 height={40}
               />
             </>
           ) : (
             <img
-              src="/images/logo/logo-icon.svg"
+              src={PrithuLogo}
               alt="Logo"
-              width={32}
-              height={32}
+              width={40}
+              height={40}
             />
           )}
         </Link>
