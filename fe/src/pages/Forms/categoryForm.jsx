@@ -1,14 +1,17 @@
 import { useState } from "react";
-import { useMutation } from "@tanstack/react-query";
-import { addCategory } from "../../services/uploadService";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { addCategory } from "../../Services/FeedServices/feedServices";
 
 export default function CategoryUploadForm() {
   const [names, setNames] = useState("");
+  const queryClient = useQueryClient();
 
-  const { mutate, isLoading } = useMutation(addCategory, {
+  const { mutate, isLoading } = useMutation({
+    mutationFn: addCategory,
     onSuccess: () => {
       alert("Categories added successfully!");
       setNames("");
+      queryClient.invalidateQueries({ queryKey: ["categories"] }); 
     },
     onError: (err) => {
       alert(err.message || "Failed to add categories");
@@ -18,7 +21,7 @@ export default function CategoryUploadForm() {
   const handleSubmit = (e) => {
     e.preventDefault();
     if (!names.trim()) return alert("Please enter category names");
-    mutate({ names: names.split(",").map((n) => n.trim()) });
+    mutate({ names });
   };
 
   return (

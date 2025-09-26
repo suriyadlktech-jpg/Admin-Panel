@@ -17,6 +17,20 @@ export const blockUser = async (userId) => {
 
 export const fetchUserById = async (userId) => {
   const res = await Api.get(`${API_ENDPOINTS.GET_INDIVIDUAL_USER_DETAIL}/${userId}`);
-  console.log(res.data.user)
   return res.data.user;
 };
+
+
+
+export const fetchUserAnalytics = async (userId)=>{
+const res = await Api.get(`${API_ENDPOINTS.GET_USER_ANALYTICAL_DATA}/${userId}`);
+return res.data;
+}
+
+
+export const fetchUserLevel = async (userId)=>{
+  console.log(userId)
+const res = await Api.get(`${API_ENDPOINTS.GET_USER_TREE_LEVEL}/${userId}`);
+console.log(res.data)
+return res.data;
+}
