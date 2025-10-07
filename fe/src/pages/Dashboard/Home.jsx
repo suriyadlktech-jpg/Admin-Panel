@@ -15,7 +15,7 @@ export default function Home() {
 
   useEffect(() => {
     if (!admin?.token) {
-      navigate("/signin"); // redirect only if not logged in
+      navigate("/signin"); 
     }
   }, [admin?.token, navigate]);
 

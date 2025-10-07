@@ -57,9 +57,9 @@ export default function UserTableAnalytical() {
 
             {/* Table Body */}
             <TableBody className="divide-y divide-gray-100 dark:divide-white/[0.05]">
-              {users.map((user) => (
+              {users.map((user,idx) => (
                 <motion.tr
-                  key={user._id}
+                  key={idx}
                   initial={{ opacity: 0, x: 20 }}
                   animate={{ opacity: 1, x: 0 }}
                   exit={{ opacity: 0, x: 20 }}

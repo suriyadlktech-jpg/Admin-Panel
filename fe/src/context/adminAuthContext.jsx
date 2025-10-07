@@ -27,21 +27,31 @@ export const AdminAuthProvider = ({ children }) => {
   }, []);
 
   const login = async (identifier, password) => {
-    try {
-      setLoading(true);
-      const res = await api.post(API_ENDPOINTS.ADMIN_LOGIN, { identifier, password });
-      const token = res.data.token;
-      const adminData = res.data.admin;
-      localStorage.setItem("admin", JSON.stringify({ ...adminData, token }));
-      setAdmin({ ...adminData, token });
-      setRole(adminData.role);
-      setError(null);
-    } catch (err) {
-      setError(err.response?.data?.error || "Login failed");
-    } finally {
-      setLoading(false);
-    }
-  };
+  try {
+    setLoading(true);
+    const res = await api.post(API_ENDPOINTS.ADMIN_LOGIN, { identifier, password });
+    
+    const token = res.data.token;
+    const adminData = res.data.admin;
+    const grantedPermissions = res.data.grantedPermissions || [];
+
+    // Save everything in localStorage
+    localStorage.setItem(
+      "admin",
+      JSON.stringify({ ...adminData, token, grantedPermissions,role })
+    );
+
+    // Update state
+    setAdmin({ ...adminData, token, grantedPermissions });
+    setRole(adminData.role);
+    setError(null);
+  } catch (err) {
+    setError(err.response?.data?.error || "Login failed");
+  } finally {
+    setLoading(false);
+  }
+};
+
 
   const logout = () => {
     setAdmin(null);

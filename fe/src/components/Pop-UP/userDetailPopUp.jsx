@@ -1,5 +1,7 @@
+import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { FaTimes } from "react-icons/fa";
+import { motion, AnimatePresence } from "framer-motion";
 import { fetchUserById } from "../../Services/UserServices/userServices.js";
 
 export default function UserDetailModal({ userId, onClose }) {
@@ -8,6 +10,14 @@ export default function UserDetailModal({ userId, onClose }) {
     queryFn: () => fetchUserById(userId),
     enabled: !!userId,
   });
+
+  const [activeTab, setActiveTab] = useState("Profile");
+
+  const tabVariants = {
+    hidden: { opacity: 0, y: -10 },
+    visible: { opacity: 1, y: 0 },
+    exit: { opacity: 0, y: 10 },
+  };
 
   if (isLoading) {
     return (
@@ -31,17 +41,42 @@ export default function UserDetailModal({ userId, onClose }) {
     );
   }
 
+  const tabs = [
+    { id: "Profile", label: "Profile" },
+    { id: "Account", label: "Account" },
+    { id: "Subscription", label: "Subscription" },
+    { id: "Device", label: "Device" },
+    { id: "Activity", label: "Activity" },
+    { id: "Education", label: "Education Detail" },
+    { id: "Employment", label: "Employment Detail" },
+  ];
+
+  const renderTable = (rows) => (
+  <table className="min-w-full border-collapse border border-gray-200 dark:border-gray-700">
+    <tbody>
+      {rows.map(({ label, value }, idx) => (
+        <tr key={idx} className="border-b border-gray-200 dark:border-gray-700">
+          <td className="w-1/3 px-4 py-2 font-medium text-gray-600 dark:text-gray-400 border-r border-gray-200 dark:border-gray-700">
+            {label}
+          </td>
+          <td className="w-2/3 px-4 py-2 text-gray-800 dark:text-gray-200">
+            {value || "-"}
+          </td>
+        </tr>
+      ))}
+    </tbody>
+  </table>
+);
+
+
   return (
     <div className="fixed inset-0 z-[9999] animate-fadeInUp">
       {/* Overlay */}
-      <div
-        className="absolute inset-0 bg-black/50"
-        onClick={onClose}
-      ></div>
+      <div className="absolute inset-0 bg-black/50" onClick={onClose}></div>
 
       {/* Modal Content */}
       <div className="relative flex items-center justify-center min-h-screen p-4">
-        <div className="relative w-full max-w-6xl bg-white dark:bg-gray-900 rounded-2xl shadow-xl overflow-hidden z-[10000]">
+        <div className="relative w-[900px] h-[600px] bg-white dark:bg-gray-900 rounded-2xl shadow-xl overflow-hidden z-[10000] flex flex-col">
           {/* Close button */}
           <button
             onClick={onClose}
@@ -51,9 +86,9 @@ export default function UserDetailModal({ userId, onClose }) {
           </button>
 
           {/* Top User Header */}
-          <div className="flex items-center gap-6 p-6 border-b border-gray-200 dark:border-gray-700">
+          <div className="flex items-center gap-6 p-6 border-b border-gray-200 dark:border-gray-700 flex-shrink-0">
             <img
-              src={user.profile?.profileAvatar}
+              src={user.profile?.profileAvatar || "/fallback-avatar.png"}
               alt={user.userName}
               className="w-28 h-28 rounded-full border-4 border-white dark:border-gray-800 shadow-lg object-cover"
             />
@@ -61,63 +96,120 @@ export default function UserDetailModal({ userId, onClose }) {
               <h2 className="text-2xl font-semibold text-gray-800 dark:text-white">
                 {user.userName || "Unnamed"}
               </h2>
-              <p className="text-gray-500 dark:text-gray-400">📧 {user.email}</p>
+              <p className="text-gray-500 dark:text-gray-400">📧 {user.email || "-"}</p>
               <p className="text-gray-500 dark:text-gray-400">
-                Role: <span className="font-medium">{user.role}</span>
+                Role: <span className="font-medium">{user.role || "-"}</span>
               </p>
             </div>
           </div>
 
-          {/* Content Section */}
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 p-6">
-            {/* Profile */}
-            <div className="bg-gray-50 dark:bg-gray-800 p-4 rounded-xl shadow-sm">
-              <h3 className="font-semibold text-gray-700 dark:text-white mb-2">Profile</h3>
-              <p><span className="text-gray-500">Gender:</span> {user.profile?.gender || "-"}</p>
-              <p><span className="text-gray-500">DOB:</span> {user.profile?.dateOfBirth ? new Date(user.profile.dateOfBirth).toLocaleDateString() : "-"}</p>
-              <p><span className="text-gray-500">Marital Status:</span> {user.profile?.maritalStatus === "true" ? "Married" : "Single"}</p>
-              <p><span className="text-gray-500">Phone:</span> {user.profile?.phoneNumber || "-"}</p>
-              <p><span className="text-gray-500">Timezone:</span> {user.profile?.timezone || "-"}</p>
-              <p><span className="text-gray-500">Bio:</span> {user.profile?.bio || "-"}</p>
-            </div>
-
-            {/* Account */}
-            <div className="bg-gray-50 dark:bg-gray-800 p-4 rounded-xl shadow-sm">
-              <h3 className="font-semibold text-gray-700 dark:text-white mb-2">Account</h3>
-              <p><span className="text-gray-500">Referral Code:</span> {user.referralCode || "-"}</p>
-              <p><span className="text-gray-500">Referred By:</span> {user.referredByUserId || "-"}</p>
-              <p><span className="text-gray-500">Level:</span> {user.currentLevel || "-"}</p>
-              <p><span className="text-gray-500">Tier:</span> {user.currentTier || "-"}</p>
-              <p><span className="text-gray-500">Total Earnings:</span> ${user.totalEarnings || 0}</p>
-              <p><span className="text-gray-500">Withdrawable:</span> ${user.withdrawableEarnings || 0}</p>
-            </div>
-
-            {/* Subscription */}
-            <div className="bg-gray-50 dark:bg-gray-800 p-4 rounded-xl shadow-sm">
-              <h3 className="font-semibold text-gray-700 dark:text-white mb-2">Subscription</h3>
-              <p><span className="text-gray-500">Active:</span> {user.subscription?.subscriptionActive ? "✅ Yes" : "❌ No"}</p>
-              <p><span className="text-gray-500">Start:</span> {user.subscription?.startDate ? new Date(user.subscription.startDate).toLocaleDateString() : "-"}</p>
-              <p><span className="text-gray-500">End:</span> {user.subscription?.endDate ? new Date(user.subscription.endDate).toLocaleDateString() : "-"}</p>
-              <p><span className="text-gray-500">Activated At:</span> {user.subscription?.subscriptionActiveDate ? new Date(user.subscription.subscriptionActiveDate).toLocaleDateString() : "-"}</p>
-            </div>
-
-            {/* Device */}
-            <div className="bg-gray-50 dark:bg-gray-800 p-4 rounded-xl shadow-sm">
-              <h3 className="font-semibold text-gray-700 dark:text-white mb-2">Device</h3>
-              <p><span className="text-gray-500">Type:</span> {user.device?.deviceType || "-"}</p>
-              <p><span className="text-gray-500">Name:</span> {user.device?.deviceName || "-"}</p>
-              <p><span className="text-gray-500">IP:</span> {user.device?.ipAddress || "-"}</p>
-            </div>
-
-            {/* Activity */}
-            <div className="bg-gray-50 dark:bg-gray-800 p-4 rounded-xl shadow-sm md:col-span-2 lg:col-span-2">
-              <h3 className="font-semibold text-gray-700 dark:text-white mb-2">Activity</h3>
-              <p><span className="text-gray-500">Active:</span> {user.isActive ? "✅ Yes" : "❌ No"}</p>
-              <p><span className="text-gray-500">Active At:</span> {user.isActiveAt ? new Date(user.isActiveAt).toLocaleString() : "-"}</p>
-              <p><span className="text-gray-500">Last Login:</span> {user.lastLoginAt ? new Date(user.lastLoginAt).toLocaleString() : "-"}</p>
-              <p><span className="text-gray-500">Languages:</span> App - {user.language?.appLanguageCode || "en"}, Feed - {user.language?.feedLanguageCode || "en"}</p>
-            </div>
+          {/* Tabs */}
+          <div className="flex border-b border-gray-200 dark:border-gray-700 flex-shrink-0">
+            {tabs.map((tab) => (
+              <button
+                key={tab.id}
+                onClick={() => setActiveTab(tab.id)}
+                className={`px-4 py-2 text-sm font-medium transition-colors border-b-2 ${
+                  activeTab === tab.id
+                    ? "border-blue-600 text-blue-600"
+                    : "border-transparent text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200"
+                }`}
+              >
+                {tab.label}
+              </button>
+            ))}
           </div>
+
+          {/* Tab Content */}
+          <AnimatePresence mode="wait">
+  {activeTab === "Profile" && (
+    <motion.div key="Profile" initial="hidden" animate="visible" exit="exit" variants={tabVariants} transition={{ duration: 0.3 }}>
+      {renderTable([
+        { label: "Gender", value: user.profile?.gender },
+        { label: "DOB", value: user.profile?.dateOfBirth ? new Date(user.profile.dateOfBirth).toLocaleDateString() : null },
+        { label: "Marital Status", value: user.profile?.maritalStatus === "true" ? "Married" : "Single" },
+        { label: "Phone", value: user.profile?.phoneNumber },
+        { label: "Timezone", value: user.profile?.timezone },
+        { label: "Bio", value: user.profile?.bio },
+      ])}
+    </motion.div>
+  )}
+
+  {activeTab === "Account" && (
+    <motion.div key="Account" initial="hidden" animate="visible" exit="exit" variants={tabVariants} transition={{ duration: 0.3 }}>
+      {renderTable([
+        { label: "Referral Code", value: user.referralCode },
+        { label: "Referred By", value: user.referredByUserId },
+        { label: "Level", value: user.currentLevel },
+        { label: "Tier", value: user.currentTier },
+        { label: "Total Earnings", value: `$${user.totalEarnings || 0}` },
+        { label: "Withdrawable", value: `$${user.withdrawableEarnings || 0}` },
+      ])}
+    </motion.div>
+  )}
+
+  {activeTab === "Subscription" && (
+    <motion.div key="Subscription" initial="hidden" animate="visible" exit="exit" variants={tabVariants} transition={{ duration: 0.3 }}>
+      {renderTable([
+        { label: "Active", value: user.subscription?.subscriptionActive ? "✅ Yes" : "❌ No" },
+        { label: "Start Date", value: user.subscription?.startDate ? new Date(user.subscription.startDate).toLocaleDateString() : null },
+        { label: "End Date", value: user.subscription?.endDate ? new Date(user.subscription.endDate).toLocaleDateString() : null },
+        { label: "Activated At", value: user.subscription?.subscriptionActiveDate ? new Date(user.subscription.subscriptionActiveDate).toLocaleDateString() : null },
+      ])}
+    </motion.div>
+  )}
+
+  {activeTab === "Device" && (
+    <motion.div key="Device" initial="hidden" animate="visible" exit="exit" variants={tabVariants} transition={{ duration: 0.3 }}>
+      {renderTable([
+        { label: "Type", value: user.device?.deviceType },
+        { label: "Name", value: user.device?.deviceName },
+        { label: "IP", value: user.device?.ipAddress },
+      ])}
+    </motion.div>
+  )}
+
+  {activeTab === "Activity" && (
+    <motion.div key="Activity" initial="hidden" animate="visible" exit="exit" variants={tabVariants} transition={{ duration: 0.3 }}>
+      {renderTable([
+        { label: "Active", value: user.isActive ? "✅ Yes" : "❌ No" },
+        { label: "Active At", value: user.isActiveAt ? new Date(user.isActiveAt).toLocaleString() : null },
+        { label: "Last Login", value: user.lastLoginAt ? new Date(user.lastLoginAt).toLocaleString() : null },
+        { label: "Languages", value: `App - ${user.language?.appLanguageCode || "en"}, Feed - ${user.language?.feedLanguageCode || "en"}` },
+      ])}
+    </motion.div>
+  )}
+
+  {activeTab === "Education" && (
+    <motion.div key="Education" initial="hidden" animate="visible" exit="exit" variants={tabVariants} transition={{ duration: 0.3 }}>
+      {user.education?.length > 0 ? user.education.map((edu, idx) => (
+        <div key={idx} className="mb-4">
+          {renderTable([
+            { label: "Degree", value: edu.degree },
+            { label: "Institution", value: edu.institution },
+            { label: "Year", value: edu.year },
+          ])}
+        </div>
+      )) : <p className="text-gray-500 dark:text-gray-400">No education details available.</p>}
+    </motion.div>
+  )}
+
+  {activeTab === "Employment" && (
+    <motion.div key="Employment" initial="hidden" animate="visible" exit="exit" variants={tabVariants} transition={{ duration: 0.3 }}>
+      {user.employment?.length > 0 ? user.employment.map((job, idx) => (
+        <div key={idx} className="mb-4">
+          {renderTable([
+            { label: "Company", value: job.company },
+            { label: "Role", value: job.role },
+            { label: "Start Date", value: job.startDate ? new Date(job.startDate).toLocaleDateString() : null },
+            { label: "End Date", value: job.endDate ? new Date(job.endDate).toLocaleDateString() : "Present" },
+          ])}
+        </div>
+      )) : <p className="text-gray-500 dark:text-gray-400">No employment details available.</p>}
+    </motion.div>
+  )}
+</AnimatePresence>
+
         </div>
       </div>
     </div>

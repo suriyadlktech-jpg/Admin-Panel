@@ -44,11 +44,11 @@ export async function deleteFeed(formData) {
   try {
     const tokenData = localStorage.getItem("admin");
     if (!tokenData) throw new Error("Admin token not found");
-console.log(tokenData)
-    const  {token}  = JSON.parse(tokenData);
-    console.log(token)
 
-    console.log(formData)
+    const  {token}  = JSON.parse(tokenData);
+
+
+  
 
     const res = await Api.post(API_ENDPOINTS. formData, {
       headers: {

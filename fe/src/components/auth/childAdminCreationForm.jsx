@@ -6,7 +6,7 @@ import Input from "../form/input/InputField";
 import Checkbox from "../form/input/Checkbox";
 import { useAdminAuth } from "../../context/adminAuthContext";
 
-export default function ChildAdminForm() {
+export default function ChildAdminForm({ onSuccess }) { // receive onSuccess
   const [showPassword, setShowPassword] = useState(false);
   const [isChecked, setIsChecked] = useState(false);
   const [username, setUsername] = useState("");
@@ -36,23 +36,26 @@ export default function ChildAdminForm() {
         adminType: "Child_Admin",
       });
 
-   if (res?.admin) {
-  const { email, childAdminId } = res.admin;
+      if (res?.admin) {
+        const { email, childAdminId, username, adminType } = res.admin;
 
-  setPopup({
-  type: "success",
-  message: null,
-  content: (
-    <div className="space-y-2">
-      <p className="font-semibold text-green-600">Child Admin created successfully!</p>
-      <div className="text-gray-700">
-        <p><span className="font-semibold">Email:</span> {email}</p>
-        <p><span className="font-semibold">Password:</span> {password}</p>
-        <p><span className="font-semibold">ChildAdmin ID:</span> {childAdminId}</p>
-      </div>
-    </div>
-  ),
-});
+        // Call onSuccess to update parent state instantly
+        if (onSuccess) onSuccess({ email, childAdminId, username, adminType });
+
+        setPopup({
+          type: "success",
+          message: null,
+          content: (
+            <div className="space-y-2">
+              <p className="font-semibold text-green-600">Child Admin created successfully!</p>
+              <div className="text-gray-700">
+                <p><span className="font-semibold">Email:</span> {email}</p>
+                <p><span className="font-semibold">Password:</span> {password}</p>
+                <p><span className="font-semibold">ChildAdmin ID:</span> {childAdminId}</p>
+              </div>
+            </div>
+          ),
+        });
 
         // Clear form
         setUsername("");
@@ -74,19 +77,17 @@ export default function ChildAdminForm() {
   };
 
   return (
-    <div className="flex flex-col flex-1 w-full overflow-y-auto lg:w-1/2 no-scrollbar relative">
+    <div className="flex flex-col flex-1 w-full overflow-y-auto lg:w-full no-scrollbar relative">
       {/* Response Modal */}
       {popup && (
         <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-30 z-50">
           <div className="bg-white rounded-lg shadow-lg p-6 w-96 max-w-sm animate-fadeIn">
-            <h2
-              className={`text-lg font-semibold mb-2 ${
-                popup.type === "success" ? "text-green-600" : "text-red-600"
-              }`}
-            >
+            <h2 className={`text-lg font-semibold mb-2 ${popup.type === "success" ? "text-green-600" : "text-red-600"}`}>
               {popup.type === "success" ? "Success" : "Error"}
             </h2>
-            <p className="text-gray-700">{popup.message}</p>
+            <div className="text-gray-700">
+              {popup.content ? popup.content : <p>{popup.message}</p>}
+            </div>
             <button
               onClick={() => setPopup(null)}
               className="mt-4 px-4 py-2 bg-brand-500 text-white rounded hover:bg-brand-600"
@@ -98,10 +99,7 @@ export default function ChildAdminForm() {
       )}
 
       <div className="w-full max-w-md mx-auto mb-5 sm:pt-10">
-        <Link
-          to="/"
-          className="inline-flex items-center text-sm text-gray-500 transition-colors hover:text-gray-700"
-        >
+        <Link to="/" className="inline-flex items-center text-sm text-gray-500 transition-colors hover:text-gray-700">
           <ChevronLeftIcon className="size-5" />
           Back to dashboard
         </Link>
@@ -112,18 +110,13 @@ export default function ChildAdminForm() {
           <h1 className="mb-2 font-semibold text-gray-800 text-title-sm sm:text-title-md">
             Create Child Admin
           </h1>
-          <p className="text-sm text-gray-500">
-            Fill in the details to create a new child admin account.
-          </p>
+          <p className="text-sm text-gray-500">Fill in the details to create a new child admin account.</p>
           {error && <p className="mt-2 text-sm text-red-500">{error}</p>}
         </div>
 
         <form onSubmit={handleSubmit} className="space-y-5">
-          {/* User Name */}
           <div>
-            <Label>
-              User Name<span className="text-error-500">*</span>
-            </Label>
+            <Label>User Name<span className="text-error-500">*</span></Label>
             <Input
               type="text"
               placeholder="Enter user name"
@@ -133,11 +126,8 @@ export default function ChildAdminForm() {
             />
           </div>
 
-          {/* Email */}
           <div>
-            <Label>
-              Email<span className="text-error-500">*</span>
-            </Label>
+            <Label>Email<span className="text-error-500">*</span></Label>
             <Input
               type="email"
               placeholder="Enter email"
@@ -147,11 +137,8 @@ export default function ChildAdminForm() {
             />
           </div>
 
-          {/* Password */}
           <div>
-            <Label>
-              Password<span className="text-error-500">*</span>
-            </Label>
+            <Label>Password<span className="text-error-500">*</span></Label>
             <div className="relative">
               <Input
                 type={showPassword ? "text" : "password"}
@@ -164,15 +151,11 @@ export default function ChildAdminForm() {
                 onClick={() => setShowPassword(!showPassword)}
                 className="absolute z-30 -translate-y-1/2 cursor-pointer right-4 top-1/2"
               >
-                {showPassword ? (
-                  <EyeIcon className="fill-gray-500 size-5" />
-                ) : (
-                  <EyeCloseIcon className="fill-gray-500 size-5" />
-                )}
+                {showPassword ? <EyeIcon className="fill-gray-500 size-5" /> : <EyeCloseIcon className="fill-gray-500 size-5" />}
               </span>
             </div>
           </div>
-          {/* Submit Button */}
+
           <div>
             <button
               type="submit"
@@ -184,44 +167,6 @@ export default function ChildAdminForm() {
           </div>
         </form>
       </div>
-      {/* Response Modal */}
-{popup && (
-  <div className="fixed inset-0 flex items-center justify-center bg-opacity-30 z-50">
-    <div className="bg-white rounded-lg shadow-lg p-6 w-96 max-w-sm animate-fadeIn">
-      <h2
-        className={`text-lg font-semibold mb-2 ${
-          popup.type === "success" ? "text-green-600" : "text-red-600"
-        }`}
-      >
-        {popup.type === "success" ? "Success" : "Error"}
-      </h2>
-
-      {/* Render content if exists, else message */}
-      <div className="text-gray-700">
-        {popup.content ? popup.content : <p>{popup.message}</p>}
-      </div>
-
-      <button
-        onClick={() => setPopup(null)}
-        className="mt-4 px-4 py-2 bg-brand-500 text-white rounded hover:bg-brand-600"
-      >
-        Close
-      </button>
-    </div>
-  </div>
-)}
-
-
-      {/* Fade-in animation */}
-      <style>{`
-        @keyframes fadeIn {
-          from { opacity: 0; transform: translateY(-10px); }
-          to { opacity: 1; transform: translateY(0); }
-        }
-        .animate-fadeIn {
-          animation: fadeIn 0.3s ease-out;
-        }
-      `}</style>
     </div>
   );
 }
